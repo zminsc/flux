@@ -19,7 +19,7 @@ const theme = createTheme({
 function App() {
   const handleLogin = () => {
     // Redirect to backend OAuth route
-    window.location.href = 'http://localhost:3001/api/auth/google';
+    window.location.href = `${process.env.REACT_APP_BACKEND_URL}/api/auth/google`;
   };
 
   const Landing = () => (

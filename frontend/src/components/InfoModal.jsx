@@ -19,7 +19,7 @@ function InfoModal({ sender, onClose }) {
     const fetchInstructions = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3001/api/emails/analyze/${encodeURIComponent(sender.email)}`,
+          `${process.env.REACT_APP_BACKEND_URL}/api/emails/analyze/${encodeURIComponent(sender.email)}`,
           { credentials: 'include' }
         );
         if (!response.ok) {
