@@ -47,7 +47,7 @@ function Dashboard() {
     setModalLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:3001/api/emails/from/${encodeURIComponent(sender.email)}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/emails/from/${encodeURIComponent(sender.email)}`,
         { credentials: 'include' }
       );
       if (!response.ok) {
@@ -65,9 +65,10 @@ function Dashboard() {
   useEffect(() => {
     const fetchEmailStats = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/emails/recent', {
-          credentials: 'include'
-        });
+        const response = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/api/emails/recent`,
+          { credentials: 'include' }
+        );
         if (!response.ok) {
           throw new Error('Failed to fetch email statistics');
         }
