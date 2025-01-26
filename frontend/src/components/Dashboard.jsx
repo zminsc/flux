@@ -65,16 +65,29 @@ function Dashboard() {
   useEffect(() => {
     const fetchEmailStats = async () => {
       try {
+        console.log('Fetching email stats from:', `${process.env.REACT_APP_BACKEND_URL}/api/emails/recent`);
         const response = await fetch(
           `${process.env.REACT_APP_BACKEND_URL}/api/emails/recent`,
           { credentials: 'include' }
         );
+        console.log('Response status:', response.status);
+        const responseData = await response.json();
+        
         if (!response.ok) {
+          console.error('Failed to fetch emails:', {
+            status: response.status,
+            statusText: response.statusText,
+            data: responseData
+          });
           throw new Error('Failed to fetch email statistics');
         }
-        const data = await response.json();
-        setSenderStats(data);
+        setSenderStats(responseData);
       } catch (err) {
+        console.error('Dashboard error:', {
+          message: err.message,
+          stack: err.stack,
+          type: err.name
+        });
         setError(err.message);
       } finally {
         setLoading(false);

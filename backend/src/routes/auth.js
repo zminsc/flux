@@ -33,18 +33,31 @@ router.get('/google/callback',
     session: true
   }),
   (req, res) => {
+    console.log('OAuth callback successful:', {
+      user: req.user,
+      session: req.session,
+      cookies: req.cookies
+    });
     res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
   }
 );
 
 // Check authentication status
 router.get('/status', (req, res) => {
+  console.log('Auth status check:', {
+    isAuthenticated: req.isAuthenticated(),
+    session: req.session,
+    user: req.user,
+    cookies: req.cookies
+  });
+
   if (req.isAuthenticated()) {
     res.json({ 
       isAuthenticated: true, 
       user: req.user 
     });
   } else {
+    console.log('User not authenticated');
     res.json({ 
       isAuthenticated: false 
     });

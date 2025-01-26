@@ -13,12 +13,42 @@ const isAuthenticated = (req, res, next) => {
     session: req.session,
     isAuthenticated: req.isAuthenticated(),
     user: req.user,
-    headers: req.headers
+    headers: {
+      origin: req.headers.origin,
+      cookie: req.headers.cookie,
+      'user-agent': req.headers['user-agent'],
+      referer: req.headers.referer
+    }
   });
 
+  // Check if session exists
+  if (!req.session) {
+    console.error('No session found in request');
+    return res.status(401).json({ error: 'No session found' });
+  }
+
+  // Check if passport session exists
+  if (!req.session.passport) {
+    console.error('No passport session found:', {
+      sessionContent: req.session,
+      cookies: req.cookies
+    });
+    return res.status(401).json({ error: 'No passport session found' });
+  }
+
   if (req.isAuthenticated()) {
+    console.log('User authenticated:', {
+      userId: req.user.googleId,
+      email: req.user.email
+    });
     return next();
   }
+
+  console.error('Authentication failed:', {
+    session: req.session,
+    passport: req.session.passport,
+    cookies: req.cookies
+  });
   res.status(401).json({ error: 'Not authenticated' });
 };
 
