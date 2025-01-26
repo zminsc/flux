@@ -8,6 +8,14 @@ const instructionsCache = new Map();
 
 // Middleware to check if user is authenticated
 const isAuthenticated = (req, res, next) => {
+  console.log('Auth Check:', {
+    cookies: req.cookies,
+    session: req.session,
+    isAuthenticated: req.isAuthenticated(),
+    user: req.user,
+    headers: req.headers
+  });
+
   if (req.isAuthenticated()) {
     return next();
   }

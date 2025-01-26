@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const passport = require('./config/passport');
 
@@ -10,12 +11,19 @@ const emailRoutes = require('./routes/emails');
 const app = express();
 const port = process.env.PORT || 3001;
 
+console.log('Environment:', {
+  NODE_ENV: process.env.NODE_ENV,
+  FRONTEND_URL: process.env.FRONTEND_URL,
+  BACKEND_URL: process.env.BACKEND_URL
+});
+
 // Middleware
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
 app.use(morgan('dev')); // Logging middleware
 
 // Session configuration
