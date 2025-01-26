@@ -20,7 +20,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: '/api/auth/google/callback',
+      callbackURL: 'https://flux-pdfx.onrender.com/api/auth/google/callback',
       scope: [
         'profile',
         'email',
