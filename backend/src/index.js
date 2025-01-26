@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const passport = require('./config/passport');
+const MemoryStore = session.MemoryStore;
 
 const authRoutes = require('./routes/auth');
 const emailRoutes = require('./routes/emails');
@@ -29,6 +30,22 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('dev')); // Logging middleware
 
+// Create a new memory store instance
+const sessionStore = new MemoryStore();
+
+// Add debug logging
+sessionStore.on('set', (sid) => {
+  console.log('Session set:', sid);
+});
+
+sessionStore.on('get', (sid) => {
+  console.log('Session get:', sid);
+});
+
+sessionStore.on('destroy', (sid) => {
+  console.log('Session destroy:', sid);
+});
+
 // Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -41,26 +58,7 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'  // Required for cross-site cookies in production
   },
-  store: {
-    get: function(sid, callback) {
-      console.log('Session get:', sid);
-      callback();
-    },
-    set: function(sid, session, callback) {
-      console.log('Session set:', {
-        sid,
-        session: {
-          ...session,
-          cookie: session.cookie.toJSON()
-        }
-      });
-      callback();
-    },
-    destroy: function(sid, callback) {
-      console.log('Session destroy:', sid);
-      callback();
-    }
-  }
+  store: sessionStore
 }));
 
 // Initialize Passport and restore authentication state from session
