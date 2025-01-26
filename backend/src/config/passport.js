@@ -30,21 +30,11 @@ passport.use(
       accessType: 'offline',
       prompt: 'consent'
     },
-    async (accessToken, refreshToken, profile, done) => {
+    (accessToken, refreshToken, profile, done) => {
       try {
-        // Here you would typically:
-        // 1. Check if user exists in your database
-        // 2. Create new user if they don't exist
-        // 3. Return user object
-        
-        const user = {
-          googleId: profile.id,
-          email: profile.emails[0].value,
-          name: profile.displayName,
-          accessToken: accessToken
-        };
-        
-        return done(null, user);
+        // Pass the full profile object to maintain the session
+        profile.accessToken = accessToken;  // Add access token to profile
+        return done(null, profile);
       } catch (error) {
         return done(error, null);
       }

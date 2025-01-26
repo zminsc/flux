@@ -61,7 +61,7 @@ router.get('/recent', isAuthenticated, async (req, res) => {
     );
 
     oauth2Client.setCredentials({
-      access_token: req.user.accessToken
+      access_token: req.user.accessToken  // Now getting from the profile object
     });
 
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
@@ -204,7 +204,7 @@ router.get('/from/:email', isAuthenticated, async (req, res) => {
     );
 
     oauth2Client.setCredentials({
-      access_token: req.user.accessToken
+      access_token: req.user.accessToken  // Now getting from the profile object
     });
 
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
@@ -279,7 +279,7 @@ router.get('/analyze/:email', isAuthenticated, async (req, res) => {
     );
 
     oauth2Client.setCredentials({
-      access_token: req.user.accessToken
+      access_token: req.user.accessToken  // Now getting from the profile object
     });
 
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
