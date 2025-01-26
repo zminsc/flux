@@ -38,8 +38,8 @@ const isAuthenticated = (req, res, next) => {
 
   if (req.isAuthenticated()) {
     console.log('User authenticated:', {
-      userId: req.user.googleId,
-      email: req.user.email
+      userId: req.user.id,
+      email: req.user.emails[0].value
     });
     return next();
   }
