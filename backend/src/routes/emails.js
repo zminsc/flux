@@ -345,4 +345,47 @@ router.get('/analyze/:email', isAuthenticated, async (req, res) => {
   }
 });
 
+// Delete all emails from a specific sender
+router.post('/delete/:email', isAuthenticated, async (req, res) => {
+  try {
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET
+    );
+
+    oauth2Client.setCredentials({
+      access_token: req.user.accessToken
+    });
+
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+
+    // Find emails from the sender
+    const response = await gmail.users.messages.list({
+      userId: 'me',
+      q: `from:${req.params.email}`
+    });
+
+    if (!response.data.messages) {
+      return res.json({ message: 'No emails found from this sender' });
+    }
+
+    // Delete emails
+    await Promise.all(response.data.messages.map(async (message) => {
+      await gmail.users.messages.delete({
+        userId: 'me',
+        id: message.id
+      });
+    }));
+
+    res.json({ message: 'Deleted all emails from sender' });
+  } catch (error) {
+    console.error('Error deleting emails:', error);
+    if (error.code === 404) {
+      res.json({ message: 'All emails deleted successfully' });
+    } else {
+      res.status(500).json({ error: 'Failed to delete emails' });
+    }
+  }
+});
+
 module.exports = router; 

@@ -19,10 +19,12 @@ import {
 } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import UnsubscribeIcon from '@mui/icons-material/Unsubscribe';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import InfoIcon from '@mui/icons-material/Info';
 import EmailModal from './EmailModal';
 import InfoModal from './InfoModal';
+import UnsubscribeModal from './UnsubscribeModal';
 
 function Dashboard() {
   const [senderStats, setSenderStats] = useState([]);
@@ -33,6 +35,7 @@ function Dashboard() {
   const [modalLoading, setModalLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [infoSender, setInfoSender] = useState(null);
+  const [unsubscribeSender, setUnsubscribeSender] = useState(null);
 
   const filteredStats = senderStats.filter(stat => {
     const query = searchQuery.toLowerCase();
@@ -59,6 +62,34 @@ function Dashboard() {
       console.error('Error fetching sender emails:', err);
     } finally {
       setModalLoading(false);
+    }
+  };
+
+  const handleUnsubscribe = async (includeDelete) => {
+    try {
+      if (includeDelete) {
+        await handleDeleteEmails(unsubscribeSender.email);
+      }
+      window.open(unsubscribeSender.unsubscribeUrl, '_blank');
+    } catch (err) {
+      console.error('Error during unsubscribe process:', err);
+      alert('Failed to complete the unsubscribe process');
+    }
+  };
+
+  const handleDeleteEmails = async (email) => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/api/emails/delete/${encodeURIComponent(email)}`,
+        { method: 'POST', credentials: 'include' }
+      );
+      if (!response.ok) {
+        throw new Error('Failed to delete emails');
+      }
+      alert('Successfully deleted emails from sender');
+    } catch (err) {
+      console.error('Error deleting emails:', err);
+      alert('Failed to delete emails');
     }
   };
 
@@ -204,25 +235,47 @@ function Dashboard() {
                 </TableCell>
                 <TableCell>
                   {stat.unsubscribeUrl ? (
-                    <Tooltip title="Unsubscribe from sender">
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        size="small"
-                        fullWidth
-                        startIcon={<UnsubscribeIcon />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(stat.unsubscribeUrl, '_blank');
-                        }}
-                        sx={{
-                          justifyContent: 'flex-start',
-                          minWidth: '140px'
-                        }}
-                      >
-                        Unsubscribe
-                      </Button>
-                    </Tooltip>
+                    <>
+                      <Tooltip title="Unsubscribe from sender">
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          fullWidth
+                          startIcon={<UnsubscribeIcon />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUnsubscribeSender(stat);
+                          }}
+                          sx={{
+                            justifyContent: 'flex-start',
+                            minWidth: '140px',
+                            mb: 1
+                          }}
+                        >
+                          Unsubscribe
+                        </Button>
+                      </Tooltip>
+                      <Tooltip title="Delete all emails">
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          size="small"
+                          fullWidth
+                          startIcon={<DeleteIcon />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteEmails(stat.email);
+                          }}
+                          sx={{
+                            justifyContent: 'flex-start',
+                            minWidth: '140px'
+                          }}
+                        >
+                          Delete All
+                        </Button>
+                      </Tooltip>
+                    </>
                   ) : (
                     <Tooltip title="View unsubscribe information">
                       <Button
@@ -276,6 +329,14 @@ function Dashboard() {
         <InfoModal
           sender={infoSender}
           onClose={() => setInfoSender(null)}
+        />
+      )}
+
+      {unsubscribeSender && (
+        <UnsubscribeModal
+          sender={unsubscribeSender}
+          onClose={() => setUnsubscribeSender(null)}
+          onConfirm={handleUnsubscribe}
         />
       )}
     </Container>
