@@ -1,75 +1,45 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Container, Typography, Button, Box } from '@mui/material';
-import GoogleIcon from '@mui/icons-material/Google';
+import { FcGoogle } from 'react-icons/fc';
 import Dashboard from './components/Dashboard';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#2563eb', // Tailwind blue-600
-    },
-    background: {
-      default: '#f3f4f6', // Tailwind gray-100
-    },
-  },
-});
+import Layout from './components/Layout';
 
 function App() {
   const handleLogin = () => {
-    // Redirect to backend OAuth route
     window.location.href = `${process.env.REACT_APP_BACKEND_URL}/api/auth/google`;
   };
 
   const Landing = () => (
-    <Container maxWidth="sm">
-      <Box
-        sx={{
-          mt: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          bgcolor: 'white',
-          p: 4,
-          borderRadius: 2,
-          boxShadow: 1,
-        }}
-      >
-        <Typography variant="h3" component="h1" gutterBottom align="center" sx={{ fontWeight: 'bold' }}>
+    <div className="container mx-auto px-4 max-w-lg">
+      <div className="mt-20 flex flex-col items-center bg-white p-8 rounded-lg shadow">
+        <h1 className="text-4xl font-bold text-navy-light text-center mb-4">
           Welcome to Flux
-        </Typography>
-        <Typography variant="h6" color="text.secondary" align="center" sx={{ mb: 4 }}>
+        </h1>
+        <p className="text-xl text-gray-600 text-center mb-8">
           Supercharge the way you use email.
-        </Typography>
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<GoogleIcon />}
+        </p>
+        <button
           onClick={handleLogin}
-          sx={{
-            py: 1.5,
-            px: 4,
-            textTransform: 'none',
-            fontSize: '1.1rem',
-          }}
+          className="flex items-center gap-2 px-6 py-3 bg-navy-light text-white rounded-lg text-lg font-medium hover:bg-navy transition-colors"
         >
+          <FcGoogle className="text-2xl" />
           Sign in with Google
-        </Button>
-      </Box>
-    </Container>
+        </button>
+      </div>
+    </div>
   );
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
-      </Router>
-    </ThemeProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+        <Route path="/home" element={<Layout><div className="p-6">Home Page (Coming Soon)</div></Layout>} />
+        <Route path="/interact" element={<Layout><div className="p-6">Interact Page (Coming Soon)</div></Layout>} />
+        <Route path="/summarize" element={<Layout><div className="p-6">Summarize Page (Coming Soon)</div></Layout>} />
+        <Route path="/arrange" element={<Layout><div className="p-6">Arrange Page (Coming Soon)</div></Layout>} />
+      </Routes>
+    </Router>
   );
 }
 

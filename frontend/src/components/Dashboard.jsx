@@ -1,30 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Container,
-  Typography,
-  CircularProgress,
-  Alert,
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-  Tooltip,
-  TextField,
-  InputAdornment
-} from '@mui/material';
-import EmailIcon from '@mui/icons-material/Email';
-import UnsubscribeIcon from '@mui/icons-material/Unsubscribe';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SearchIcon from '@mui/icons-material/Search';
-import InfoIcon from '@mui/icons-material/Info';
+import { FiSearch, FiChevronDown } from 'react-icons/fi';
+import { BiUnlink } from 'react-icons/bi';
+import { RiDeleteBin6Line } from 'react-icons/ri';
 import EmailModal from './EmailModal';
 import InfoModal from './InfoModal';
 import UnsubscribeModal from './UnsubscribeModal';
+import UnsubCard from './UnsubCard';
 
 function Dashboard() {
   const [senderStats, setSenderStats] = useState([]);
@@ -36,6 +17,7 @@ function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [infoSender, setInfoSender] = useState(null);
   const [unsubscribeSender, setUnsubscribeSender] = useState(null);
+  const [sortBy, setSortBy] = useState('date');
 
   const filteredStats = senderStats.filter(stat => {
     const query = searchQuery.toLowerCase();
@@ -129,190 +111,63 @@ function Dashboard() {
   }, []);
 
   if (loading) return (
-    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-      <CircularProgress />
-    </Box>
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#6B7DB3] border-t-transparent"></div>
+    </div>
   );
   
   if (error) return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Alert severity="error">Error: {error}</Alert>
-    </Container>
+    <div className="p-6">
+      <div className="bg-red-100 text-red-700 p-4 rounded">Error: {error}</div>
+    </div>
   );
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h3" component="h1" align="center" gutterBottom sx={{ mb: 4 }}>
-        Flux
-      </Typography>
-      <Box sx={{ mb: 4 }}>
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Search by name or email..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-            sx: {
-              backgroundColor: 'white',
-              '&:hover': {
-                backgroundColor: 'white',
-              },
-              '&.Mui-focused': {
-                backgroundColor: 'white',
-              }
-            }
-          }}
-          sx={{
-            display: 'block',
-            mb: 3,
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-            }
-          }}
-        />
-      </Box>
-      <TableContainer component={Paper} sx={{ 
-        boxShadow: 2,
-        borderRadius: 2,
-        overflow: 'hidden'
-      }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: 'primary.main' }}>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Sender Name</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Email Address</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Last Email</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Email Count</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredStats.map((stat, index) => (
-              <TableRow
-                key={index}
-                hover
-                sx={{ 
-                  cursor: 'pointer',
-                  '&:hover': {
-                    backgroundColor: 'action.hover',
-                  }
-                }}
-                onClick={() => handleCardClick(stat)}
-              >
-                <TableCell>
-                  <Typography variant="body1" fontWeight="medium">
-                    {stat.name}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" color="text.secondary">
-                    {stat.email}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" color="text.secondary">
-                    {new Date(stat.lastEmailDate).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <EmailIcon color="primary" />
-                    <Typography variant="body1" color="primary" fontWeight="medium">
-                      {stat.count}
-                    </Typography>
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  {stat.unsubscribeUrl ? (
-                    <>
-                      <Tooltip title="Unsubscribe from sender">
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          fullWidth
-                          startIcon={<UnsubscribeIcon />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setUnsubscribeSender(stat);
-                          }}
-                          sx={{
-                            justifyContent: 'flex-start',
-                            minWidth: '140px',
-                            mb: 1
-                          }}
-                        >
-                          Unsubscribe
-                        </Button>
-                      </Tooltip>
-                      <Tooltip title="Delete all emails">
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          size="small"
-                          fullWidth
-                          startIcon={<DeleteIcon />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteEmails(stat.email);
-                          }}
-                          sx={{
-                            justifyContent: 'flex-start',
-                            minWidth: '140px'
-                          }}
-                        >
-                          Delete All
-                        </Button>
-                      </Tooltip>
-                    </>
-                  ) : (
-                    <Tooltip title="View unsubscribe information">
-                      <Button
-                        variant="outlined"
-                        color="info"
-                        size="small"
-                        fullWidth
-                        startIcon={<InfoIcon />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setInfoSender(stat);
-                        }}
-                        sx={{
-                          justifyContent: 'flex-start',
-                          minWidth: '140px'
-                        }}
-                      >
-                        Info
-                      </Button>
-                    </Tooltip>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-            {filteredStats.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
-                  <Typography color="text.secondary">
-                    No results found for "{searchQuery}"
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+    <div className="pr-4">
+      {/* Search and Filter Bar */}
+      <div className="flex gap-4 items-center">
+        {/* Search Bar */}
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            placeholder="SEARCH..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-3 bg-[#F0F0F0] rounded-lg focus:outline-none placeholder-gray-500"
+          />
+        </div>
 
+        {/* Sort By Dropdown */}
+        <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 bg-white">
+          <span className="text-gray-600">SORT BY</span>
+          <FiChevronDown className="text-gray-600" />
+        </button>
+
+        {/* AI Filter */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="AI FILTER..."
+            className="px-4 py-2 bg-[#F7F3F0] rounded-lg focus:outline-none placeholder-gray-500 w-48"
+          />
+        </div>
+      </div>
+
+      {/* Email Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+        {filteredStats.map((sender, index) => (
+          <UnsubCard
+            key={index}
+            sender={sender}
+            onCardClick={handleCardClick}
+            onUnsubscribe={setUnsubscribeSender}
+            onDelete={handleDeleteEmails}
+            onInfo={setInfoSender}
+          />
+        ))}
+      </div>
+
+      {/* Modals */}
       {selectedSender && (
         <EmailModal
           sender={selectedSender}
@@ -339,7 +194,7 @@ function Dashboard() {
           onConfirm={handleUnsubscribe}
         />
       )}
-    </Container>
+    </div>
   );
 }
 

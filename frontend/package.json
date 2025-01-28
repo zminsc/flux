@@ -3,17 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
+    "react-icons": "^4.12.0",
     "react-router-dom": "^6.22.0",
-    "@mui/material": "^5.15.7",
-    "@mui/icons-material": "^5.15.7",
-    "@emotion/react": "^11.11.3",
-    "@emotion/styled": "^11.11.0",
-    "tailwindcss": "^3.4.1",
-    "postcss": "^8.4.35",
-    "autoprefixer": "^10.4.17"
+    "react-scripts": "5.0.1",
+    "tailwindcss": "^3.4.1"
   },
   "overrides": {
     "@svgr/webpack": "^8.0.1",
@@ -22,8 +19,8 @@
     "@babel/traverse": "^7.23.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "EXTEND_ESLINT=true react-scripts start",
+    "build": "EXTEND_ESLINT=true react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -43,5 +40,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "fontkit": "^2.0.4"
   }
 }

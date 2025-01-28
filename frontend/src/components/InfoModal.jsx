@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
-  Typography,
-  Box,
-  CircularProgress,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import { FiX } from 'react-icons/fi';
 
 function InfoModal({ sender, onClose }) {
   const [loading, setLoading] = useState(true);
@@ -38,47 +29,37 @@ function InfoModal({ sender, onClose }) {
   }, [sender.email]);
 
   return (
-    <Dialog
-      open={true}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 2,
-        }
-      }}
-    >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        borderBottom: 1,
-        borderColor: 'divider'
-      }}>
-        <Typography variant="h6">
-          Unsubscribe Information
-        </Typography>
-        <IconButton onClick={onClose} size="small">
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ py: 3 }}>
-        {loading ? (
-          <Box display="flex" justifyContent="center" p={2}>
-            <CircularProgress size={24} />
-          </Box>
-        ) : error ? (
-          <Typography color="error">
-            {error}
-          </Typography>
-        ) : (
-          <Typography>
-            {instructions || 'No methods for unsubscribing found'}
-          </Typography>
-        )}
-      </DialogContent>
-    </Dialog>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg w-full max-w-md">
+        <div className="flex justify-between items-center p-4">
+          <h2 className="text-lg font-medium text-gray-800">
+            Finding Unsubscribe Link
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <FiX className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="p-6">
+          {loading ? (
+            <div className="flex justify-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#F3B8A6] border-t-transparent"></div>
+            </div>
+          ) : error ? (
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg">
+              {error}
+            </div>
+          ) : (
+            <div className="bg-gray-50 p-4 rounded-lg text-gray-700">
+              {instructions || 'No methods for unsubscribing found'}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
