@@ -107,18 +107,33 @@ export default function Dashboard() {
 
   const getEmailContent = (email: EmailMessage) => {
     // Try to get content from parts first (multipart emails)
-    const textPart = email.payload?.parts?.find(
-      (part) => part.mimeType === 'text/plain' || part.mimeType === 'text/html'
-    )
+    const textPart =
+      email.payload?.parts?.find((part) => part.mimeType === 'text/plain') ||
+      email.payload?.parts?.find((part) => part.mimeType === 'text/html')
 
     // If no parts, try the body directly
     const content = textPart?.body.data || email.payload?.body?.data
 
     if (content) {
-      // Gmail API returns base64url encoded content
       try {
+        // Gmail API returns base64url encoded content
         const decoded = atob(content.replace(/-/g, '+').replace(/_/g, '/'))
+
+        // Handle HTML content by stripping tags
+        if (textPart?.mimeType === 'text/html') {
+          return decoded
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+        }
+
+        // Clean up plain text content
         return decoded
+          .split('\n')
+          .map((line) => line.trim())
+          .join('\n')
+          .replace(/\n{3,}/g, '\n\n') // Replace multiple newlines with double newline
+          .trim()
       } catch (e) {
         return 'Unable to decode email content'
       }
@@ -136,70 +151,83 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl text-navy-light font-bold">Recent Emails</h1>
+    <div className="flex h-full">
+      {/* Main Content */}
+      <div className="flex-1 p-8 pr-[400px]">
+        <h1 className="text-2xl text-navy-light font-bold mb-8">Recent Emails</h1>
 
-      {/* Drop Zone */}
-      <div
-        className="p-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 max-w-full"
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-      >
-        {fetchingContent || generatingDraft ? (
-          <p className="text-gray-500">
-            {generatingDraft ? 'Generating reply...' : 'Loading email content...'}
-          </p>
-        ) : droppedEmail ? (
-          <div className="space-y-4">
-            <h2 className="font-medium break-words">
-              {droppedEmail.payload?.headers?.find((h) => h.name === 'Subject')?.value}
-            </h2>
-            <p className="text-sm text-gray-600 break-words">
-              From: {droppedEmail.payload?.headers?.find((h) => h.name === 'From')?.value}
-            </p>
-            <div className="mt-4 p-4 bg-white rounded border">
-              <h3 className="font-medium mb-2">Original Email:</h3>
-              <div className="prose max-w-none">
-                <pre className="whitespace-pre-wrap break-words font-sans overflow-x-auto">
-                  {getEmailContent(droppedEmail)}
-                </pre>
-              </div>
+        {/* Email List */}
+        <div className="space-y-2">
+          {emails.map((email) => (
+            <div
+              key={email.id}
+              className="p-4 bg-white rounded-lg shadow cursor-move hover:shadow-md transition-shadow"
+              draggable
+              onDragStart={(e) => handleDragStart(e, email.id)}
+            >
+              <h2 className="font-medium break-words">
+                {email.payload?.headers?.find((h) => h.name === 'Subject')?.value}
+              </h2>
+              <p className="text-sm text-gray-600 break-words">
+                From: {email.payload?.headers?.find((h) => h.name === 'From')?.value}
+              </p>
             </div>
-            {draftReply && (
-              <div className="mt-4 p-4 bg-navy-light/5 rounded border">
-                <h3 className="font-medium mb-2 text-navy">Draft Reply:</h3>
-                <div className="prose max-w-none">
-                  <pre className="whitespace-pre-wrap break-words font-sans overflow-x-auto">
-                    {draftReply}
+          ))}
+        </div>
+      </div>
+
+      {/* Right Sidebar */}
+      <div className="fixed top-0 right-0 w-[400px] h-full bg-gray-50 border-l border-gray-200 overflow-y-auto">
+        <div className="p-6 sticky top-0 bg-gray-50 border-b border-gray-200">
+          <h2 className="text-lg font-medium text-navy">Draft Email Reply</h2>
+        </div>
+
+        {/* Drop Zone */}
+        <div className="p-6" onDrop={handleDrop} onDragOver={handleDragOver}>
+          {fetchingContent || generatingDraft ? (
+            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 bg-white">
+              <p className="text-gray-500 text-center">
+                {generatingDraft ? 'Generating reply...' : 'Loading email content...'}
+              </p>
+            </div>
+          ) : droppedEmail ? (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <h3 className="font-medium mb-2">Original Email</h3>
+                <p className="text-sm font-medium break-words">
+                  {droppedEmail.payload?.headers?.find((h) => h.name === 'Subject')?.value}
+                </p>
+                <p className="text-sm text-gray-600 break-words mt-1">
+                  From: {droppedEmail.payload?.headers?.find((h) => h.name === 'From')?.value}
+                </p>
+                <div className="mt-3 pt-3 border-t">
+                  <pre
+                    className="text-sm whitespace-pre-wrap break-words font-sans w-full"
+                    style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
+                  >
+                    {getEmailContent(droppedEmail)}
                   </pre>
                 </div>
               </div>
-            )}
-          </div>
-        ) : (
-          <p className="text-gray-500">
-            Drop an email here to see its content and get a draft reply
-          </p>
-        )}
-      </div>
 
-      {/* Email List */}
-      <div className="space-y-2">
-        {emails.map((email) => (
-          <div
-            key={email.id}
-            className="p-4 bg-white rounded-lg shadow cursor-move hover:shadow-md transition-shadow"
-            draggable
-            onDragStart={(e) => handleDragStart(e, email.id)}
-          >
-            <h2 className="font-medium break-words">
-              {email.payload?.headers?.find((h) => h.name === 'Subject')?.value}
-            </h2>
-            <p className="text-sm text-gray-600 break-words">
-              From: {email.payload?.headers?.find((h) => h.name === 'From')?.value}
-            </p>
-          </div>
-        ))}
+              {draftReply && (
+                <div className="rounded-lg border border-navy-light/20 bg-navy-light/5 p-4">
+                  <h3 className="font-medium mb-2 text-navy">Draft Reply</h3>
+                  <pre
+                    className="text-sm whitespace-pre-wrap break-words font-sans w-full"
+                    style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
+                  >
+                    {draftReply}
+                  </pre>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 bg-white">
+              <p className="text-gray-500 text-center">Drag an email here to generate a reply</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
